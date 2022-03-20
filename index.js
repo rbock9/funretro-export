@@ -3,7 +3,7 @@ const path = require('path');
 const { chromium } = require('playwright');
 const { exit } = require('process');
 
-const [url, file] = process.argv.slice(2);
+const [url] = process.argv.slice(2);
 
 if (!url) {
     throw 'Please provide a URL as the first argument.';
@@ -128,4 +128,4 @@ function handleError(error) {
     console.error(error);
 }
 
-run().then((data) => writeToFile(file, data.text)).catch(handleError);
+run().then((data) => writeToFile(data.title, data.text)).catch(handleError);
