@@ -6,7 +6,7 @@ const { exit } = require('process');
 const [url] = process.argv.slice(2);
 
 if (!url) {
-    throw 'Please provide a URL as the first argument.';
+    throw 'Please provide an EasyRetro Board URL as the argument.';
 }
 
 // The 'run' function grabs the content of the team's Easy Retro board, separates the board title and text content, reformats the title and text content per the Acceptance Criteria, then returns an object which stores the reformatted title and text content as strings
@@ -112,9 +112,14 @@ async function run() {
     return fileDetails;
 }
 
-function writeToFile(filePath, data) {
-    const resolvedPath = path.resolve(filePath || `../${data.split('\n')[0].replace('/', '')}.txt`);
-    fs.writeFile(resolvedPath, data, (error) => {
+// This is the function that writes the data to a CSV file. It's asynchronous because we want the run function to return its value before this function begins
+async function writeToFile(data) {
+    // Here we use destructuring to extract the title and text from the fileDetails object which was returned from the run function
+    const { title, text } = await data;
+    // The resolvedPath variable creates the filepath in the parent folder of this application. It uses the title data from the fileDetails object as the file name (per the Acceptance Criteria of this challenge), and string interpolation to save the file as a csv file
+    const resolvedPath = path.resolve(`../${title}.csv`);
+    // Now we're using Node's file system module (fs) to access our computer's file system, and using the writeFile method to write the file to our computer
+    fs.writeFile(resolvedPath, text, (error) => {
         if (error) {
             throw error;
         } else {
@@ -124,8 +129,10 @@ function writeToFile(filePath, data) {
     });
 }
 
+// This function handles errors! We use console.error to tell us about the error if an error occurs
 function handleError(error) {
     console.error(error);
 }
 
-run().then((data) => writeToFile(data.title, data.text)).catch(handleError);
+// This statement actually runs the program. It uses the data pulled from the Easy Retro board as an argument in the .then method and the writeToFile function
+run().then((data) => writeToFile(data)).catch(handleError);
